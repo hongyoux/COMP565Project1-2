@@ -90,7 +90,7 @@ namespace AGMGSKv9
                 float distance = Vector3.Distance(agentObject.Translation, t.Obj.Translation);
                 if (distance < distanceToTagTreasure + t.BoundingSphereRadius)
                 {
-                    t.Tag(this);
+                    stage.TagTreasure(t, this);
                     this.treasuresFound++;
                 }
             }

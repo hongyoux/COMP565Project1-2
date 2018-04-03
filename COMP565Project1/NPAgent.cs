@@ -165,7 +165,7 @@ namespace AGMGSKv9
             if (distance <= (tagDistance + t.BoundingSphereRadius))
             {
                 //Tag the treasure so it can't be found again.
-                t.Tag(this);
+                stage.TagTreasure(t, this);
                 this.treasuresFound++;
                 //Found treasure, stop seeking and switch states.
                 treasureNav = null;

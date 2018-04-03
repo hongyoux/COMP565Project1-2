@@ -129,6 +129,12 @@ namespace AGMGSKv9
             draws = updates = 0;
         }
 
+        internal void TagTreasure(Treasure t, Agent a)
+        {
+            t.Tag(a);
+            Components.Remove(t);
+        }
+
         internal Treasure GetClosestTreasure(Vector3 translation)
         {
             // Set distance to Maximum, find the closest untagged treasure
