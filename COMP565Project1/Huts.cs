@@ -34,6 +34,8 @@ namespace AGMGSKv9
             int separationX = 0;
             int separationZ = 0;
 
+            IsCollidable = true;
+
             random = new Random();
             // add nClouds random cloud instances
             for (int i = 0; i < nHuts; i++)

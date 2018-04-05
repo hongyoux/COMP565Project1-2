@@ -4,24 +4,24 @@
   <Platform>DesktopGL</Platform>
   <Config />
   <SourceFiles>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/100x50x100Marker.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/100x100x100brick.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/boundingSphereV8.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/cloudV3.FBX</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/dogV6.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/magentaAvatarV6.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/redAvatarV6.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/templeV3.fbx</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/inspectorBackground.png</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/marble.png</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/Consolas.spritefont</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/Hut.x</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/colorTexture.png</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/heightTexture.png</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/Bush.x</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/TreasureBox4.x</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/TreasureBox1.x</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/TreasureBox2.x</File>
-    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/TreasureBox3.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/100x50x100Marker.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/100x100x100brick.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/boundingSphereV8.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/cloudV3.FBX</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/dogV6.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/magentaAvatarV6.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/redAvatarV6.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/templeV3.fbx</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/inspectorBackground.png</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/marble.png</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/Consolas.spritefont</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/Hut.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/colorTexture.png</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/heightTexture.png</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/Bush.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/TreasureBox4.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/TreasureBox1.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/TreasureBox2.x</File>
+    <File>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/TreasureBox3.x</File>
   </SourceFiles>
 </SourceFileCollection>

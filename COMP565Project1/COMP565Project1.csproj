@@ -55,6 +55,7 @@
     <Compile Include="NavNode.cs" />
     <Compile Include="NPAgent.cs" />
     <Compile Include="Object3D.cs" />
+    <Compile Include="ObstacleHuts.cs" />
     <Compile Include="Pack.cs" />
     <Compile Include="Path.cs" />
     <Compile Include="Player.cs" />

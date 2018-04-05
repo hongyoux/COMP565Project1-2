@@ -45,6 +45,7 @@ namespace AGMGSKv9
     ///    matrix   5 lines displayed with infoCount == 1, set with setMatrix();
     ///    misc     5 lines displayed with infoCount == 2 && showMisc, set with setInfo();
     ///    hongyou  5 lines displayed with infoCount == 3 && showMisc, set with setInfo();
+    ///    hongyou  5 lines displayed with infoCount == 4 && showMisc, set with setInfo();
     ///    
     /// Inspector expects its client's to respond to the following key events:
     ///    H, h  showHelp()  -- toggles between help and info displays for Draw
@@ -58,11 +59,12 @@ namespace AGMGSKv9
     {
         // Display constants
         private const int InfoPaneSize = 5;   // number of lines / info display pane
-        private const int InfoDisplayStrings = 25;  // number of total display strings
+        private const int InfoDisplayStrings = 30;  // number of total display strings
         private const int MatrixBase = 5;
         private const int FirstBase = 10;    // base to offset for display strings
         private const int SecondBase = 15;   // second pane for display strings
         private const int ThirdBase = 20;
+        private const int FourthBase = 25;
         // Screen Viewport and text fonts and display information variables
         private Viewport infoViewport;
         private SpriteFont infoFont;
@@ -124,21 +126,22 @@ namespace AGMGSKv9
             if (showHelp || showMatrices)
                 showHelp = showMatrices = false;
             else
-                infoCount = (infoCount + 1) % 3;
+                infoCount = (infoCount + 1) % 4;
         }
 
 
 
         /// <summary>
         /// setInfo used to set individual string values for display.
-        /// Can be used to set any of 20 (0..19) string values.
+        /// Can be used to set any of 30 (0..29) string values.
         /// Help is considered to be strings 0..4
         /// Info in strings 5..9
         /// Matrix in strings 10..14
         /// Miscellaneous in strings 15..19
-        /// Hongyou's work in strings 20..25
+        /// Hongyou's work in strings 20..24
+        /// Hongyou's work in strings 25..29
         /// </summary>
-        /// <param name="stringIndex"> 0..25 index of string to set</param>
+        /// <param name="stringIndex"> 0..29 index of string to set</param>
         /// <param name="str"> value of string</param>
         public void setInfo(int stringIndex, string str)
         {
@@ -216,8 +219,17 @@ namespace AGMGSKv9
                 }
             }
             else if (infoCount == 2)
-            { // show Hongyou's info strings 20..25
+            { // show Hongyou's info strings 20..24
                 int infoBase = ThirdBase;
+                for (int i = 0; i < InfoPaneSize; i++)
+                {
+                    FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);
+                    spriteBatch.DrawString(infoFont, infoString[infoBase + i], FontPos[i], fontColor);
+                }
+            }
+            else if (infoCount == 3)
+            { // show Hongyou's info strings 25..29
+                int infoBase = FourthBase;
                 for (int i = 0; i < InfoPaneSize; i++)
                 {
                     FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);

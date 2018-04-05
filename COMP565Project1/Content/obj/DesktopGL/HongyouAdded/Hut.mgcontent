@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/HongyouAdded/Hut.x</SourceFile>
-  <SourceTime>2018-02-22T01:54:05.625234-08:00</SourceTime>
-  <DestFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/bin/DesktopGL/HongyouAdded/Hut.xnb</DestFile>
-  <DestTime>2018-02-22T01:54:23.8242957-08:00</DestTime>
+  <SourceFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/HongyouAdded/Hut.x</SourceFile>
+  <SourceTime>2018-04-02T22:40:08.6730789-07:00</SourceTime>
+  <DestFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/bin/DesktopGL/HongyouAdded/Hut.xnb</DestFile>
+  <DestTime>2018-04-02T22:58:43.0418614-07:00</DestTime>
   <Importer>XImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

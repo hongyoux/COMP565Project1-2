@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PipelineBuildEvent xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <SourceFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/dogV6.fbx</SourceFile>
-  <SourceTime>2017-01-22T22:43:18-08:00</SourceTime>
-  <DestFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1/COMP565Project1/Content/bin/DesktopGL/dogV6.xnb</DestFile>
-  <DestTime>2018-02-18T18:43:24.8309557-08:00</DestTime>
+  <SourceFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/dogV6.fbx</SourceFile>
+  <SourceTime>2018-04-02T22:40:07.9137276-07:00</SourceTime>
+  <DestFile>C:/Users/Zhang/Documents/COMP565/COMP565Project1-2/COMP565Project1/Content/bin/DesktopGL/dogV6.xnb</DestFile>
+  <DestTime>2018-04-02T22:58:42.1168845-07:00</DestTime>
   <Importer>FbxImporter</Importer>
   <ImporterTime>2017-03-01T07:05:36-08:00</ImporterTime>
   <Processor>ModelProcessor</Processor>

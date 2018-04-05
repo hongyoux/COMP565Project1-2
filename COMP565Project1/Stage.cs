@@ -73,6 +73,7 @@ namespace AGMGSKv9
         protected Model boundingSphere3D;    // a  bounding sphere model
         protected Model wayPoint3D;          // a way point marker -- for paths.
         protected bool drawBoundingSpheres = false;
+        protected bool drawSensors = false;
         protected bool fog = false;
         protected bool fixedStepRendering = true;     // 60 updates / second
                                                       // Viewports and matrix for split screen display w/ Inspector.cs
@@ -81,7 +82,7 @@ namespace AGMGSKv9
         protected Matrix sceneProjection, inspectorProjection;
         // variables required for use with Inspector
         protected const int InfoPaneSize = 5;   // number of lines / info display pane
-        protected const int InfoDisplayStrings = 25;  // number of total display strings
+        protected const int InfoDisplayStrings = 30;  // number of total display strings
         protected Inspector inspector;
         protected SpriteFont inspectorFont;
         // Projection values
@@ -189,6 +190,16 @@ namespace AGMGSKv9
             {
                 drawBoundingSpheres = value;
                 inspector.setInfo(8, String.Format("Draw bounding spheres = {0}", drawBoundingSpheres));
+            }
+        }
+
+        public bool DrawSensors
+        {
+            get { return drawSensors; }
+            set
+            {
+                drawSensors = value;
+                inspector.setInfo(25, String.Format("Draw sensors = {0}", drawSensors));
             }
         }
 
@@ -419,17 +430,9 @@ namespace AGMGSKv9
             spriteBatch = new SpriteBatch(display);      // Create a new SpriteBatch
             inspectorFont = Content.Load<SpriteFont>("Consolas");    // Windows XNA && MonoGames
                                                                      // set window size 
-            if (runFullScreen)
-            {
-                graphics.IsFullScreen = true;
-                graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width;
-                graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height;
-            }
-            else
-            { // run with window values 
-                graphics.PreferredBackBufferWidth = windowWidth;
-                graphics.PreferredBackBufferHeight = windowHeight;
-            }
+            graphics.PreferredBackBufferWidth = windowWidth;
+            graphics.PreferredBackBufferHeight = windowHeight;
+
             graphics.ApplyChanges();
             // viewports
             defaultViewport = GraphicsDevice.Viewport;
@@ -483,7 +486,7 @@ namespace AGMGSKv9
             npAgent = new NPAgent(this, "Evader",
                new Vector3(490 * spacing, terrain.surfaceHeight(490, 450), 450 * spacing),
                new Vector3(0, 1, 0), 0.0f, "magentaAvatarV6");  // facing +Z
-            npAgent.IsCollidable = false;  // npAgent does not test for collisions
+            npAgent.IsCollidable = true;  // npAgent does not test for collisions
             Components.Add(npAgent);
             // create file output stream for trace()
             fout = new StreamWriter("trace.txt", false);
@@ -527,6 +530,10 @@ namespace AGMGSKv9
             //Huts (10 of them)
             Huts huts = new Huts(this, "hut", "HongyouAdded/Hut", 10);
             Components.Add(huts);
+
+            ObstacleHuts obstacles = new ObstacleHuts(this, "hut", "HongyouAdded/Hut");
+            Components.Add(obstacles);
+
             // --------------------------------------------------
             // ----------- MY CONTENT END -----------------------
             // --------------------------------------------------
@@ -596,6 +603,8 @@ namespace AGMGSKv9
                 setCamera(1);
             else if (keyboardState.IsKeyDown(Keys.X) && !oldKeyboardState.IsKeyDown(Keys.X))
                 setCamera(-1);
+            else if (keyboardState.IsKeyDown(Keys.Z) && !oldKeyboardState.IsKeyDown(Keys.Z))
+                DrawSensors = !DrawSensors;
 
             // key event handlers needed for Inspector
             // set help display on
@@ -616,7 +625,7 @@ namespace AGMGSKv9
             // toggle update speed between FixedStep and ! FixedStep
             else if (keyboardState.IsKeyDown(Keys.T) && !oldKeyboardState.IsKeyDown(Keys.T))
                 FixedStepRendering = !FixedStepRendering;
-           
+
             // Lerp key event handler
             else if (keyboardState.IsKeyDown(Keys.L) && !oldKeyboardState.IsKeyDown(Keys.L))
             {
