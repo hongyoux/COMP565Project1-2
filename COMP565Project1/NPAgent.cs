@@ -37,6 +37,15 @@ namespace AGMGSKv9
         DONE
     }
 
+    public enum ObjectAvoidanceState
+    {
+        FOLLOW_WALL,
+        TURN_LEFT,
+        TURN_RIGHT,
+        GO_FORWARD,
+        BACK_UP
+    }
+
     /// <summary>
     /// A non-playing character that moves.  Override the inherited Update(GameTime)
     /// to implement a movement (strategy?) algorithm.
@@ -59,6 +68,12 @@ namespace AGMGSKv9
 
         private BoundingSphere left;
         private BoundingSphere right;
+        private ObjectAvoidanceState avoidState;
+        private int stateNSteps;
+        private bool goalVisible;
+        bool leftSensorHit;
+        bool rightSensorHit;
+        bool bodyHit;
 
         private int snapDistance = 20;  // this should be a function of step and stepSize
                                         // If using makePath(int[,]) set WayPoint (x, z) vertex positions in the following array
@@ -89,7 +104,7 @@ namespace AGMGSKv9
             IsCollidable = true;  // players test collision with Collidable set.
             stage.Collidable.Add(agentObject);  // player's agentObject can be collided with by others.
 
-            GenerateSensors();
+            InitSensors();
 
             state = NPAgentState.PATH_SEEK;
             first.Name = "npFirst";
@@ -229,15 +244,16 @@ namespace AGMGSKv9
         {
             float boundingSphereRadius = agentObject.ObjectBoundingSphereRadius;
             Vector3 sphereCenter = agentObject.Translation;
-            Vector3 sphereForward = agentObject.Forward * (boundingSphereRadius * 2);
-            Vector3 sphereLeft = agentObject.Left * (boundingSphereRadius);
-            Vector3 sphereRight = agentObject.Right * (boundingSphereRadius);
+            Vector3 sphereForward = agentObject.Forward * (boundingSphereRadius * 4);
+            Vector3 sphereLeft = agentObject.Left * (boundingSphereRadius * 2);
+            Vector3 sphereRight = agentObject.Right * (boundingSphereRadius * 2);
 
             left.Center = sphereCenter + sphereForward + sphereLeft;
             right.Center = sphereCenter + sphereForward + sphereRight;
+
         }
 
-        private void GenerateSensors()
+        private void InitSensors()
         {
             left = new BoundingSphere();
             right = new BoundingSphere();
@@ -246,6 +262,13 @@ namespace AGMGSKv9
             right.Radius = agentObject.ObjectBoundingSphereRadius;
 
             UpdateSensors();
+
+            avoidState = ObjectAvoidanceState.GO_FORWARD;
+            stateNSteps = 0;
+            goalVisible = true;
+            leftSensorHit = false;
+            rightSensorHit = false;
+            bodyHit = false;
         }
 
         /// <summary>
@@ -254,6 +277,34 @@ namespace AGMGSKv9
         private void ObjectAvoidance()
         {
 
+            switch(avoidState)
+            {
+                default:
+                case ObjectAvoidanceState.GO_FORWARD:
+                    {
+                        CheckSensors();
+                        break;
+                    }
+            }
+        }
+
+        private void CheckSensors()
+        {
+            foreach (Object3D obj in stage.Collidable)
+            {
+                if (Vector3.Distance(left.Center, obj.Translation) < (obj.ObjectBoundingSphereRadius + left.Radius))
+                {
+                    leftSensorHit = true;
+                }
+                if (Vector3.Distance(right.Center, obj.Translation) < (obj.ObjectBoundingSphereRadius + right.Radius))
+                {
+                    rightSensorHit = true;
+                }
+                if (Vector3.Distance(agentObject.Translation, obj.Translation) < (obj.ObjectBoundingSphereRadius + agentObject.ObjectBoundingSphereRadius))
+                {
+                    bodyHit = true;
+                }
+            }
         }
 
         public List<BoundingSphere> BoundingSpheres
@@ -274,7 +325,41 @@ namespace AGMGSKv9
             base.Draw(gameTime);
             if (stage.DrawSensors)
             {
+                Matrix[] modelTransforms = new Matrix[model.Bones.Count];
 
+                foreach (BoundingSphere b in BoundingSpheres)
+                {
+                    model.CopyAbsoluteBoneTransformsTo(modelTransforms);
+
+                    Matrix objectBoundingSphereWorld = Matrix.CreateScale(b.Radius * 2);
+                    objectBoundingSphereWorld *= Matrix.CreateTranslation(b.Center);
+
+                    foreach (ModelMesh mesh in stage.BoundingSphere3D.Meshes)
+                    {
+                        foreach (BasicEffect effect in mesh.Effects)
+                        {
+                            effect.EnableDefaultLighting();
+                            if (stage.Fog)
+                            {
+                                effect.FogColor = Color.CornflowerBlue.ToVector3();
+                                effect.FogStart = 50;
+                                effect.FogEnd = 500;
+                                effect.FogEnabled = true;
+                            }
+                            else effect.FogEnabled = false;
+                            effect.DirectionalLight0.DiffuseColor = stage.DiffuseLight;
+                            effect.AmbientLightColor = stage.AmbientLight;
+                            effect.DirectionalLight0.Direction = stage.LightDirection;
+                            effect.DirectionalLight0.Enabled = true;
+                            effect.View = stage.View;
+                            effect.Projection = stage.Projection;
+                            effect.World = objectBoundingSphereWorld * modelTransforms[mesh.ParentBone.Index];
+                        }
+                        stage.setBlendingState(true);
+                        mesh.Draw();
+                        stage.setBlendingState(false);
+                    }
+                }
             }
         }
         public void FindTreasure()
