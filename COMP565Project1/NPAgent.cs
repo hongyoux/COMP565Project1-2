@@ -39,11 +39,18 @@ namespace AGMGSKv9
 
     public enum ObjectAvoidanceState
     {
-        FOLLOW_WALL,
-        TURN_LEFT,
-        TURN_RIGHT,
         GO_FORWARD,
-        BACK_UP
+        BACK_UP,
+
+        TURN_RIGHT,
+        FOLLOW_WALL_LEFT,
+        LEFT_CORNER,
+        CORNER_PASS_LEFT,
+
+        TURN_LEFT,
+        FOLLOW_WALL_RIGHT,
+        RIGHT_CORNER,
+        CORNER_PASS_RIGHT
     }
 
     /// <summary>
@@ -71,9 +78,12 @@ namespace AGMGSKv9
         private ObjectAvoidanceState avoidState;
         private int stateNSteps;
         private bool goalVisible;
-        bool leftSensorHit;
-        bool rightSensorHit;
-        bool bodyHit;
+        private bool leftSensorHit;
+        private bool rightSensorHit;
+        private bool wallAhead;
+        private int breakOut;
+        private bool backedUp;
+        private bool InWall;
 
         private int snapDistance = 20;  // this should be a function of step and stepSize
                                         // If using makePath(int[,]) set WayPoint (x, z) vertex positions in the following array
@@ -244,9 +254,9 @@ namespace AGMGSKv9
         {
             float boundingSphereRadius = agentObject.ObjectBoundingSphereRadius;
             Vector3 sphereCenter = agentObject.Translation;
-            Vector3 sphereForward = agentObject.Forward * (boundingSphereRadius * 4);
-            Vector3 sphereLeft = agentObject.Left * (boundingSphereRadius * 2);
-            Vector3 sphereRight = agentObject.Right * (boundingSphereRadius * 2);
+            Vector3 sphereForward = agentObject.Forward * (boundingSphereRadius * 2f);
+            Vector3 sphereLeft = agentObject.Left * (boundingSphereRadius * .5f);
+            Vector3 sphereRight = agentObject.Right * (boundingSphereRadius * .5f);
 
             left.Center = sphereCenter + sphereForward + sphereLeft;
             right.Center = sphereCenter + sphereForward + sphereRight;
@@ -268,7 +278,7 @@ namespace AGMGSKv9
             goalVisible = true;
             leftSensorHit = false;
             rightSensorHit = false;
-            bodyHit = false;
+            wallAhead = false;
         }
 
         /// <summary>
@@ -276,13 +286,267 @@ namespace AGMGSKv9
         /// </summary>
         private void ObjectAvoidance()
         {
+            stage.setInfo(26, String.Format("Avoidance State: {0}", avoidState.ToString()));
+            // Move in the current direction for n steps
+            if (stateNSteps != 0)
+            {
+                stateNSteps--;
+                return;
+            }
+
+            CheckSensors();
+
+            if (InWall)
+            {
+                avoidState = ObjectAvoidanceState.BACK_UP;
+            }
 
             switch(avoidState)
             {
                 default:
                 case ObjectAvoidanceState.GO_FORWARD:
                     {
-                        CheckSensors();
+                        if (goalVisible)
+                        {
+                            Vector3 goalLocation = (treasureNav != null) ? treasureNav.Translation : nextGoal.Translation;
+                            agentObject.turnToFace(goalLocation);
+                        }
+
+                        if (leftSensorHit && wallAhead)
+                        {
+                            agentObject.Step = 0;
+                            avoidState = ObjectAvoidanceState.TURN_RIGHT;
+                        }
+                        else if (rightSensorHit && wallAhead)
+                        {
+                            agentObject.Step = 0;
+                            avoidState = ObjectAvoidanceState.TURN_LEFT;
+                        }
+                        break;
+                    }
+                case ObjectAvoidanceState.TURN_LEFT:
+                    {
+                        if (rightSensorHit)
+                        {
+                            //Stop moving forward and turn right until left sensor is not touching the wall
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI / 16)) * agentObject.Orientation;
+                            agentObject.Step = 0;
+                        }
+                        else
+                        {
+                            //Turn to the left once sensor separates so that we can stay along the wall
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 16)) * agentObject.Orientation;
+                            agentObject.Step = 1;
+                            avoidState = ObjectAvoidanceState.FOLLOW_WALL_RIGHT;
+                        }
+
+                        break;
+                    }
+                case ObjectAvoidanceState.TURN_RIGHT:
+                    {
+                        if (leftSensorHit)
+                        {
+                            //Stop moving forward and turn right until left sensor is not touching the wall
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 16)) * agentObject.Orientation;
+                            agentObject.Step = 0;
+                        }
+                        else
+                        {
+                            //Turn to the left once sensor separates so that we can stay along the wall
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI / 16)) * agentObject.Orientation;
+                            agentObject.Step = 1;
+                            avoidState = ObjectAvoidanceState.FOLLOW_WALL_LEFT;
+                        }
+
+                        break;
+                    }
+                case ObjectAvoidanceState.FOLLOW_WALL_LEFT:
+                    {
+                        //Stay close to the wall but not in it
+                        //If agent is angled toward wall still, on wallhit go back to turn right state.
+                        //If agent is angled away from wall, turn back towards wall.
+                        //If agent was angled so far away from wall that it takes two iterations of turns, that means we're at a corner.
+                        if (wallAhead)
+                        {
+                            avoidState = ObjectAvoidanceState.TURN_RIGHT;
+                            breakOut++;
+                            if (breakOut > 60)
+                            {
+                                breakOut = 0;
+                                stateNSteps = 120;
+                                avoidState = ObjectAvoidanceState.BACK_UP;
+                            }
+                        }
+
+                        if (!wallAhead && leftSensorHit)
+                        {
+                            // Walk forward
+                        }
+                        
+                        if (!leftSensorHit)
+                        {
+                            //At Corner
+                            stateNSteps = 60;
+                            // Go around the corner
+                            avoidState = ObjectAvoidanceState.LEFT_CORNER;
+                        }
+                        break;
+                    }
+                case ObjectAvoidanceState.FOLLOW_WALL_RIGHT:
+                    {
+                        //Stay close to the wall but not in it
+                        //If agent is angled toward wall still, on wallhit go back to turn right state.
+                        //If agent is angled away from wall, turn back towards wall.
+                        //If agent was angled so far away from wall that it takes two iterations of turns, that means we're at a corner.
+                        if (wallAhead)
+                        {
+                            avoidState = ObjectAvoidanceState.TURN_LEFT;
+                            breakOut++;
+                            if (breakOut > 60)
+                            {
+                                breakOut = 0;
+                                stateNSteps = 120;
+                                avoidState = ObjectAvoidanceState.BACK_UP;
+                            }
+                        }
+
+                        if (!wallAhead && rightSensorHit)
+                        {
+                            // Walk forward
+                        }
+
+                        if (!rightSensorHit)
+                        {
+                            //At Corner
+                            stateNSteps = 60;
+                            // Go around the corner
+                            avoidState = ObjectAvoidanceState.RIGHT_CORNER;
+                        }
+
+                        if (!goalVisible && !wallAhead && !leftSensorHit && !rightSensorHit)
+                        {
+                            //Can't move towards goal, no walls ahead and no sensor hits means im on the outer edge of map
+                            breakOut++;
+                            if (breakOut > 60)
+                            {
+                                //Ran into the outer walls most likely
+                                //About face and go straight
+                                breakOut = 0;
+                                agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI)) * agentObject.Orientation;
+                                avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            }
+                        }
+
+                        break;
+                    }
+                case ObjectAvoidanceState.BACK_UP:
+                    {
+                        if (backedUp == false)
+                        {
+                            //Move 90 Degrees to the left and walk in that direction
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 2)) * agentObject.Orientation;
+                            stateNSteps = 60;
+                            backedUp = true;
+                        }
+                        else
+                        {
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 2)) * agentObject.Orientation;
+                            avoidState = ObjectAvoidanceState.GO_FORWARD;
+                        }
+
+                        break;
+                    }
+                case ObjectAvoidanceState.LEFT_CORNER:
+                    {
+                        if (!leftSensorHit)
+                        {
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI / 16)) * agentObject.Orientation;
+
+                            breakOut++;
+                            if (breakOut > 60)
+                            {
+                                breakOut = 0;
+                                avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            }
+                        }
+                        else
+                        {
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 16)) * agentObject.Orientation;
+
+                            stateNSteps = 60;
+                            avoidState = ObjectAvoidanceState.CORNER_PASS_LEFT;
+                        }
+                        break;
+                    }
+                case ObjectAvoidanceState.RIGHT_CORNER:
+                    {
+                        if (!rightSensorHit)
+                        {
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(-Math.PI / 16)) * agentObject.Orientation;
+
+                            breakOut++;
+                            if (breakOut > 60)
+                            {
+                                avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            }
+                        }
+                        else
+                        {
+                            agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI / 16)) * agentObject.Orientation;
+
+                            stateNSteps = 60;
+                            avoidState = ObjectAvoidanceState.CORNER_PASS_RIGHT;
+                        }
+                        break;
+                    }
+                case ObjectAvoidanceState.CORNER_PASS_LEFT:
+                    {
+                        if (goalVisible)
+                        {
+                            Vector3 goalLocation = (treasureNav != null) ? treasureNav.Translation : nextGoal.Translation;
+                            agentObject.turnToFace(goalLocation);
+                            avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            return;
+                        }
+                        else
+                        {
+                            breakOut++;
+                            avoidState = ObjectAvoidanceState.FOLLOW_WALL_LEFT;
+                            if (breakOut > 60)
+                            {
+                                //Ran into the outer walls most likely
+                                //About face and go straight
+                                breakOut = 0;
+                                agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI)) * agentObject.Orientation;
+                                avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            }
+                        }
+
+                        break;
+                    }
+                case ObjectAvoidanceState.CORNER_PASS_RIGHT:
+                    {
+                        if (goalVisible)
+                        {
+                            Vector3 goalLocation = (treasureNav != null) ? treasureNav.Translation : nextGoal.Translation;
+                            agentObject.turnToFace(goalLocation);
+                            avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            return;
+                        }
+                        else
+                        {
+                            breakOut++;
+                            avoidState = ObjectAvoidanceState.FOLLOW_WALL_RIGHT;
+                            if (breakOut > 60)
+                            {
+                                //Ran into the outer walls most likely
+                                //About face and go straight
+                                breakOut = 0;
+                                agentObject.Orientation = Matrix.CreateRotationY((float)(Math.PI)) * agentObject.Orientation;
+                                avoidState = ObjectAvoidanceState.GO_FORWARD;
+                            }
+                        }
+
                         break;
                     }
             }
@@ -290,20 +554,63 @@ namespace AGMGSKv9
 
         private void CheckSensors()
         {
+            if ((left.Center.X < 0 || left.Center.X > 76800 || left.Center.Z < 0 || left.Center.Z > 76800) ||
+                (right.Center.X < 0 || right.Center.X > 76800 || right.Center.Z < 0 || right.Center.Z > 76800))
+            {
+                InWall = true;
+                return;
+            }
+
+            InWall = false;
+            leftSensorHit = false;
+            rightSensorHit = false;
+            wallAhead = false;
+            goalVisible = true;
+
+            Vector3 goalLocation = (treasureNav != null) ? treasureNav.Translation : nextGoal.Translation;
+
+            Vector3 yIgnoredGoalLocation = goalLocation;
+            yIgnoredGoalLocation.Y = 0;
+
+            Vector3 yIgnoredAgentObjectTranslation = agentObject.Translation;
+            yIgnoredAgentObjectTranslation.Y = 0;
+
+            Vector3 nextStepTranslation = yIgnoredAgentObjectTranslation + agentObject.Forward * agentObject.StepSize * 2;
+            Vector3 goalTranslation = yIgnoredAgentObjectTranslation + Vector3.Normalize(yIgnoredGoalLocation - yIgnoredAgentObjectTranslation) * agentObject.StepSize * 2;
+
             foreach (Object3D obj in stage.Collidable)
             {
-                if (Vector3.Distance(left.Center, obj.Translation) < (obj.ObjectBoundingSphereRadius + left.Radius))
+                if (obj == agentObject)
+                {
+                    continue;
+                }
+
+                Vector3 yIgnoredTranslation = obj.Translation;
+                yIgnoredTranslation.Y = 0;
+
+                Vector3 yIgnoredLeft = left.Center;
+                yIgnoredLeft.Y = 0;
+                Vector3 yIgnoredRight = right.Center;
+                yIgnoredRight.Y = 0;
+
+
+                if (Vector3.Distance(yIgnoredLeft, yIgnoredTranslation) <= (obj.ObjectBoundingSphereRadius + left.Radius))
                 {
                     leftSensorHit = true;
                 }
-                if (Vector3.Distance(right.Center, obj.Translation) < (obj.ObjectBoundingSphereRadius + right.Radius))
+                if (Vector3.Distance(yIgnoredRight, yIgnoredTranslation) <= (obj.ObjectBoundingSphereRadius + right.Radius))
                 {
                     rightSensorHit = true;
                 }
-                if (Vector3.Distance(agentObject.Translation, obj.Translation) < (obj.ObjectBoundingSphereRadius + agentObject.ObjectBoundingSphereRadius))
+                if (Vector3.Distance(nextStepTranslation, yIgnoredTranslation) <= (obj.ObjectBoundingSphereRadius + agentObject.ObjectBoundingSphereRadius))
                 {
-                    bodyHit = true;
+                    wallAhead = true;
                 }
+                if (Vector3.Distance(goalTranslation, yIgnoredTranslation) <= (obj.ObjectBoundingSphereRadius + agentObject.ObjectBoundingSphereRadius))
+                {
+                    goalVisible = false;
+                }
+
             }
         }
 

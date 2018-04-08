@@ -73,7 +73,7 @@ namespace AGMGSKv9
         protected Model boundingSphere3D;    // a  bounding sphere model
         protected Model wayPoint3D;          // a way point marker -- for paths.
         protected bool drawBoundingSpheres = false;
-        protected bool drawSensors = false;
+        protected bool drawSensors;
         protected bool fog = false;
         protected bool fixedStepRendering = true;     // 60 updates / second
                                                       // Viewports and matrix for split screen display w/ Inspector.cs
@@ -112,6 +112,8 @@ namespace AGMGSKv9
         private TimeSpan time;  // if you need to know the time see Property Time
         // Treasures
         protected List<Treasure> treasures = new List<Treasure>(); // List of treasures
+        // Packing Amount
+        protected int packingAmount = 0;
 
         public Stage() : base()
         {
@@ -264,6 +266,21 @@ namespace AGMGSKv9
             get { return treasures; }
         }
 
+        public int PackingAmount
+        {
+            get { return packingAmount; }
+            set
+            {
+                /* Mod 4 :
+                 *  0 = 0% packing
+                 *  1 = 33% packing
+                 *  2 = 66% packing
+                 *  3 = 99% packing
+                 */
+                packingAmount = value % 4;
+            }
+        }
+
         /// <summary>
         /// Trace = "string to be printed"
         /// Will append its value string to ../bin/debug/trace.txt file
@@ -410,6 +427,8 @@ namespace AGMGSKv9
         {
             // TODO: Add your initialization logic here
             base.Initialize();
+
+            DrawSensors = false;
         }
 
 
@@ -497,7 +516,7 @@ namespace AGMGSKv9
             Components.Add(wall);
             // create a pack for "flocking" algorithms
             // create a Pack of 6 dogs centered at (450, 500) that is leaderless
-            Pack pack = new Pack(this, "dog", "dogV6", 6, 450, 430, null);
+            Pack pack = new Pack(this, "dog", "dogV6", 6, 450, 430, player.AgentObject);
             Components.Add(pack);
 
             // ---------------------------------------------------
@@ -649,8 +668,13 @@ namespace AGMGSKv9
                 npAgent.FindTreasure();
             }
 
-            // Update the inspector for treasures
-            String pTagged = "Player Tagged Treasures: ";
+            // Adjust packing
+            else if (keyboardState.IsKeyDown(Keys.P) && !oldKeyboardState.IsKeyDown(Keys.P))
+            {
+                PackingAmount++;
+            }
+                // Update the inspector for treasures
+                String pTagged = "Player Tagged Treasures: ";
             String npTagged = "NPAgent Tagged Treasures: ";
             String untagged = "Untagged Treasures: ";
 

@@ -64,6 +64,7 @@ namespace AGMGSKv9
             pathType = aPathType;
             stage = theStage;
             done = false;
+
         }
 
         /// <summary>
@@ -81,6 +82,7 @@ namespace AGMGSKv9
             nextNode = r.Next(pathNode.Length / 2);
             stage = theStage;
             done = false;
+
             int spacing = stage.Spacing;
             int x, z;
 

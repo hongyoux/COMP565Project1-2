@@ -41,7 +41,6 @@ namespace AGMGSKv9
     public class Pack : MovableModel3D
     {
         Object3D leader;
-
         /// <summary>
         /// Construct a pack with an Object3D leader
         /// </summary>
@@ -77,6 +76,139 @@ namespace AGMGSKv9
         /// </summary>      
         public override void Update(GameTime gameTime)
         {
+            int packingPercentage = random.Next(100);
+
+            if (packingPercentage < stage.PackingAmount * 33)
+            {
+                PackingUpdate(gameTime);
+            }
+            else
+            {
+                RegularUpdate(gameTime);
+            }
+            base.Update(gameTime);  // MovableMesh's Update();
+        }
+
+        private Vector3 GetCohesionForce(Object3D obj)
+        {
+            Vector3 cohesion = (leader.Translation - obj.Translation);
+            cohesion.Normalize();
+            return cohesion;
+        }
+
+        private Vector3 GetSeparationForce(Object3D obj)
+        {
+            Vector3 sepForce = new Vector3();
+            foreach (Object3D boid in instance)
+            {
+                if (obj != boid)
+                {
+                    float distanceSquared = Vector3.DistanceSquared(boid.Translation, obj.Translation);
+                    Vector3 transDiff = (boid.Translation - obj.Translation);
+                    sepForce += transDiff / distanceSquared;
+                }
+            }
+
+            return sepForce / instance.Count;
+        }
+
+        private Vector3 GetAlignmentForce(Object3D obj)
+        {
+            Vector3 alignment = leader.Forward;
+            alignment.Normalize();
+            return alignment;
+        }
+
+        private float GetCohesionWeight(Object3D obj)
+        {
+            float distance = Vector3.Distance(obj.Translation, leader.Translation);
+            if (distance < 2000)
+            {
+                return 0;
+            }
+            else if (distance >= 3000)
+            {
+                return 1;
+            }
+            else
+            {
+                return 1 - (3000 - distance) / 1000;
+            }
+        }
+        private float GetSeparationWeight(Object3D obj)
+        {
+            float distance = Vector3.Distance(obj.Translation, leader.Translation);
+            if (distance <= 400)
+            {
+                return 1;
+            }
+            else if (distance >= 1000)
+            {
+                return 0;
+            }
+            else
+            {
+                return (1000 - distance) / 600;
+            }
+        }
+
+        private float GetAlignmentWeight(Object3D obj)
+        {
+            float distance = Vector3.Distance(obj.Translation, leader.Translation);
+            if (distance < 400 || distance > 3000)
+            {
+                return 0;
+            }
+            else if (distance < 1000)
+            {
+                return 1 - ((1000 - distance) / 600);
+            }
+            else if (distance > 2000)
+            {
+                return (3000 - distance) / 1000;
+            }
+            else
+            {
+                return 1;
+            }
+        }
+
+        private void PackingUpdate(GameTime gameTime)
+        {
+            foreach (Object3D obj in instance)
+            {
+                Vector3 cohesion = GetCohesionForce(obj) * GetCohesionWeight(obj);
+                Vector3 separation = GetSeparationForce(obj) * GetSeparationWeight(obj);
+                Vector3 alignment = GetAlignmentForce(obj) * GetAlignmentWeight(obj);
+
+                Vector3 newDirection = cohesion + separation + alignment;
+
+                Vector3 originalDirection = obj.Forward;
+                originalDirection.Normalize();
+
+                // Adjust angle of motion
+                newDirection.Normalize();
+                double cosAngle = Vector3.Dot(originalDirection, newDirection);
+
+                //If Cos is 1 or -1 or outside that number from rounding / lossy numbers, then the angle is parallel 
+                if (!(cosAngle >= 1) && !(cosAngle <= -1))
+                {
+                    float angle = (float)Math.Acos(cosAngle);
+                    if (angle < 0)
+                    {
+                        angle += (float)(2 * Math.PI);
+                    }
+
+                    obj.Yaw = angle;
+                }
+
+                obj.updateMovableObject();
+                stage.setSurfaceHeight(obj);
+            }
+        }
+
+        private void RegularUpdate(GameTime gameTime)
+        {
             // if (leader == null) need to determine "virtual leader from members"
             float angle = 0.3f;
             foreach (Object3D obj in instance)
@@ -91,9 +223,7 @@ namespace AGMGSKv9
                 obj.updateMovableObject();
                 stage.setSurfaceHeight(obj);
             }
-            base.Update(gameTime);  // MovableMesh's Update(); 
         }
-
 
         public Object3D Leader
         {
