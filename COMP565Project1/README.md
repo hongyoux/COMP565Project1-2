@@ -116,3 +116,41 @@ All models were self-made in AC3D. All of them are stored in folder HongyouAdded
 
 - "L"
   - Sets NPAgent and Player's surface tracking from default "best approximation" to lerp method mentioned in lecture 5 slides.
+
+
+## PROJECT 2 ADDENDUM ##
+
+### Treasure Detection ###
+
+In Project 1, I had already implemented the treasure search as a second update state for the NPAgent. As a result, all I needed to add was a check for distance to the closest treasure on every update, and if that number was below 4000, to switch into the TREASURE_SEEK state. Once all treasures were found, NPAgent's stepSize is set to 0 and state is set to DONE, which does nothing but return immediately on update. This effectively stops the bot from moving. In addition, I removed the components of the treasure from the list when I touch them now as a fix for Project 1. The treasure boxes will disappear on touch.
+
+There is a pane in the inspector dedicated to the treasure seeking changes, and shows which treasures are taken and how many are taken by each, as well as remaining # of treasures.
+
+In conjunction with the next big section for Object Avoidance, I also enabled collision detection for NPAgent by adding his object to the Collidables list and turning his IsCollidable to true.
+
+I also made the starting nextNode and direction random, so that I could test obstacle avoidance from different points in the path.
+
+### Obstacle Avoidance ###
+
+Obstacle avoidance is a function that is run on every update event and starts by checking if stateNSteps is a value higher than 0. If so, then just keep going in the same direction. This is used by various states to force NPAgent around corners, or to back up N steps before attempting a different set of actions. In addition, every update we check a bunch of different variables to see determine our current state. The "goalVisible" state is set to true if there is at least 2 steps in the direction of the goal without running into a collision. The "wallAhead" state is true if there is a collision within the next 2 steps in the current direction I am moving. The reason I buffer these with a bit of space is because a sphere is round, its possible that we can enter a location where the spheres interlock in a way that makes it hard for the NPAgent to fix itself.
+
+LeftSensorHit and RightSensorHit are states set to true if any collidable objects on the map are touching them. And then finally we have InWall, which is set to true if either sensor is outside the bounding box of the movable area. This is because the walls are not collidables, and therefore require a different rule.
+
+With all these sensors and states set, there ended up being a total 10 states: ["GO_FORWARD", "BACK_UP", "TURN_RIGHT", "FOLLOW_WALL_LEFT", "LEFT_CORNER", "CORNER_PASS_LEFT", "TURN_LEFT", "FOLLOW_WALL_RIGHT", "RIGHT_CORNER", "CORNER_PASS_RIGHT"]. Forward would check if the goal was moveable; if so, then it would attempt to resume going straight toward the goal. Otherwise if it detected a wall ahead, whichever sensor found the wall it would enter their respective turn states. Turn states would turn until the sensor was no longer touching the wall, and then would turn back the other way just one step. This was so that the sensor would be in contact with the wall and it would help to follow the wall. Follow_wall would do one of three things: if the agent was angled into the wall still, it would turn back out and readjust its alignment with the wall. If the agent was not and the left sensor was still touching the wall, it would simply move forward. If it lost touch of its left_sensor, it would check to see if it was at a corner. THe corner states would move forward for another second before attempting to turn left until it hit the wall (went around the corner). Otherwise it would spin for a second, and then try to move forward again. This would reset the state to goal tracking if it had made it past the wall it was attempting to follow. The backup state was set when it entered into a loop in states. This would turn the robot 180 degrees and have it move for 60 frames back. Then turn 90 degrees and move another 60 frames, before turning another 90 degrees and reseting the state to FORWARD. this would essentially move it away from any corners that could've trapped it before and gave it another attempt at traversing the obstacles.
+
+I've included the flowchart in the parent folder and hopefully that is sufficient for explaining the state machine I ended up building. I opted to not flesh out the TURN_LEFT states because they are the same as the TURN_RIGHT set of states, but with the opposite turns and signals. It was simply unwieldy to fit into the chart without making a mess. It is not the most elegant solution but it seemed to traverse the map to the different treasures relatively easily. I was unsure what you meant by a complex path to the treasure, but I set up multiple different shapes of obstacles around the map like a concave wall and a diagonal. One issue I did run into was with heights, so I ended up flattening all the spheres into circles and checking as if Y was not considered. This helped in the case of the diagonal obstacles along the mountainous areas.
+
+### Flocking ###
+
+For Flocking, I chose to use a leader-based flocking system. The leader is the player character. I tried to do the flocking with no unit of visibility, and that all members of the flock influenced each other. My assumption was that this would create a single flock and that no subflocks would spawn. The cohesion direction is the normalized direction from the dog to the player. The separation direction was determined by adding together the direction between any two boids * a separation force of 1500 units and then dividing by the distance squared. This meant that boids that were closer felt much more separation force. For the alignment force, I took the normalized vector of the leader's alignment.
+
+After generating these forces, I used the weights mentioned in the slides to generate a weight for each cohesion separation and alignment factors. These were then multiplied against the forces to get a direction of movement. Taking the dot product between this and the dog's current facing, that would generate an angle by which to rotate the yaw of each dog. This leads to some weird spinning dogs but for the most part they seem to be flocking around a point that tends to be in front of the player character. The general vicinity is there. Unfortunately I ran low on time to polish this portion of the project so I will be looking to incorporate some amount of flocking in Project 3 if possible.
+
+I ended up choosing to roll a die at the start of every update, which determined if the dog was going to perform its old behavior of spinning around a bunch, or if it would use the packing movement. I added a pane in the inspector for flocking after the obstacle avoidance pane.
+
+### Classes I changed ###
+
+
+
+### Additional User Input Commands ###
+

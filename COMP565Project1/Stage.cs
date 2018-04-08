@@ -278,6 +278,8 @@ namespace AGMGSKv9
                  *  3 = 99% packing
                  */
                 packingAmount = value % 4;
+                setInfo(30, "Packing Info:");
+                setInfo(31, String.Format("Current Percentage: {0}%", packingAmount * 33));
             }
         }
 
@@ -429,6 +431,7 @@ namespace AGMGSKv9
             base.Initialize();
 
             DrawSensors = false;
+            PackingAmount = 0;
         }
 
 

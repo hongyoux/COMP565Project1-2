@@ -59,12 +59,13 @@ namespace AGMGSKv9
     {
         // Display constants
         private const int InfoPaneSize = 5;   // number of lines / info display pane
-        private const int InfoDisplayStrings = 30;  // number of total display strings
+        private const int InfoDisplayStrings = 35;  // number of total display strings
         private const int MatrixBase = 5;
         private const int FirstBase = 10;    // base to offset for display strings
         private const int SecondBase = 15;   // second pane for display strings
         private const int ThirdBase = 20;
         private const int FourthBase = 25;
+        private const int FifthBase = 30;
         // Screen Viewport and text fonts and display information variables
         private Viewport infoViewport;
         private SpriteFont infoFont;
@@ -126,7 +127,7 @@ namespace AGMGSKv9
             if (showHelp || showMatrices)
                 showHelp = showMatrices = false;
             else
-                infoCount = (infoCount + 1) % 4;
+                infoCount = (infoCount + 1) % 5;
         }
 
 
@@ -138,8 +139,9 @@ namespace AGMGSKv9
         /// Info in strings 5..9
         /// Matrix in strings 10..14
         /// Miscellaneous in strings 15..19
-        /// Hongyou's work in strings 20..24
-        /// Hongyou's work in strings 25..29
+        /// Hongyou's work in treasure finding 20..24
+        /// Hongyou's work on object avoidance 25..29
+        /// Hongyou's work in flocking 25..29
         /// </summary>
         /// <param name="stringIndex"> 0..29 index of string to set</param>
         /// <param name="str"> value of string</param>
@@ -230,6 +232,15 @@ namespace AGMGSKv9
             else if (infoCount == 3)
             { // show Hongyou's info strings 25..29
                 int infoBase = FourthBase;
+                for (int i = 0; i < InfoPaneSize; i++)
+                {
+                    FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);
+                    spriteBatch.DrawString(infoFont, infoString[infoBase + i], FontPos[i], fontColor);
+                }
+            }
+            else if (infoCount == 4)
+            { // show Hongyou's info strings 30..34
+                int infoBase = FifthBase;
                 for (int i = 0; i < InfoPaneSize; i++)
                 {
                     FontOrigin = infoFont.MeasureString(infoString[infoBase + i]);

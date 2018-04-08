@@ -104,17 +104,22 @@ namespace AGMGSKv9
                 if (obj != boid)
                 {
                     float distanceSquared = Vector3.DistanceSquared(boid.Translation, obj.Translation);
-                    Vector3 transDiff = (boid.Translation - obj.Translation);
-                    sepForce += transDiff / distanceSquared;
+                    Vector3 transDiff = (obj.Translation - boid.Translation);
+                    transDiff.Normalize();
+                    sepForce += transDiff * 1500 / distanceSquared;
                 }
             }
+
+            float distance = Vector3.Distance(obj.Translation, leader.Translation);
+            Vector3 leaderDiff = (obj.Translation - leader.Translation) * 2;
+            sepForce += leaderDiff / distance;
 
             return sepForce / instance.Count;
         }
 
         private Vector3 GetAlignmentForce(Object3D obj)
         {
-            Vector3 alignment = leader.Forward;
+            Vector3 alignment = leader.Forward - obj.Forward;
             alignment.Normalize();
             return alignment;
         }
