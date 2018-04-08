@@ -150,7 +150,50 @@ I ended up choosing to roll a die at the start of every update, which determined
 
 ### Classes I changed ###
 
+1. NPAgent.cs
+ - Changed tagging so that it tags through stage so that stage can remove the treasure from its object list and stop rendering it
+ - Changed path to include more interesting movement
+ - Added two bounding sphere properties
+ - Set colliable to true
+ - Randomized direction of path initialization
+ - Added a done state and modified path and treasure seek update loops to set to Done if no more treasures are available
+ - Added an override for draw to be able to draw sensors on Z keypress
+ - Added ObjectAvoidance, CheckSensors, BoundingSpheres, InitSensors and various private state variables to support Object Avoidance
+ - Added in state machine enum and logic for object avoidance
 
+2. Huts.cs
+ - Made huts collidable to add more randomized obstacles
+
+3. Inspector.cs
+ - Added in two more panes for obstacle avoidance and flocking respectively
+ - Adjusted comments to be clearer what each pane is set to do.
+ 
+4. Path.cs
+ - Added new PathType Backwards to support reversing path nodes and traversing graph of nodes backwards
+ - Reformatted documentation to make indentation consistent
+ - Changed starting node to be randomized
+
+5. Stage.cs
+ - Added DrawSensors and PackingAmount properties to support drawing bounding spheres on sensors and adjusting packing amount for flocking
+ - Added Obstacle huts to the components
+ - Added keyboard inputs for both DrawSensors and PackingAmount
+
+6. Model3D.cs
+ - Formatted for consistent indentation when reading to understand bounding sphere draw method
+
+7. Pack.cs
+ - Refactored update to call RegularUpdate or PackingUpdate depending on random int generated
+ - Created Packing Update which included helper functions GetCohesionForce, GetSeparationForce, GetAlignmentForce, GetCohesionWeight, GetSeparationWeight, GetAlignmentWeight
+
+### Classes I added ###
+
+1. ObstacleHuts.cs
+ - Similar to Huts, but separate file for me to specify where to hut obstacles
+ - Created 4 arrays of custom obstacles on top of random huts and random movement from dogs
 
 ### Additional User Input Commands ###
 
+- "Z"
+ - Toggles whether or not to draw bounding spheres for sensors on NPAgent
+- "P"
+ - Cycles the packing amount for dog pack between 0 to 99%.
